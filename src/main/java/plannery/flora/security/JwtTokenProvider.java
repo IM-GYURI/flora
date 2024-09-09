@@ -130,12 +130,13 @@ public class JwtTokenProvider {
       throw new CustomException(INVALID_MEMBER_ID);
     }
 
-    return buildUserDetails(member.getEmail(), member.getRole());
+    return buildUserDetails(member.getEmail(), member.getPassword(), member.getRole());
   }
 
-  private UserDetails buildUserDetails(String email, UserRole role) {
+  private UserDetails buildUserDetails(String email, String password, UserRole role) {
     return User.builder()
         .username(email)
+        .password(password)
         .authorities(Collections.singletonList(new SimpleGrantedAuthority(role.name())))
         .build();
   }
