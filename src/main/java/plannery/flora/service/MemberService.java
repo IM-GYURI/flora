@@ -21,6 +21,7 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
+  private final BlacklistTokenService blacklistTokenService;
 
   public String signUpOrSignIn(String email, String password) {
     // 이메일을 통해 회원이 이미 존재하는지 확인
@@ -54,5 +55,14 @@ public class MemberService {
       return jwtTokenProvider.generateToken(newMember.getId(), newMember.getEmail(),
           newMember.getRole());
     }
+  }
+
+  /**
+   * 로그아웃
+   *
+   * @param token 토큰 정보
+   */
+  public void signOut(String token) {
+    blacklistTokenService.addToBlacklist(token);
   }
 }

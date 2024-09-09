@@ -1,6 +1,7 @@
 package plannery.flora.security;
 
 import static plannery.flora.exception.ErrorCode.INVALID_TOKEN;
+import static plannery.flora.exception.ErrorCode.TOKEN_BLACKLISTED;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import plannery.flora.exception.CustomException;
 import plannery.flora.exception.ErrorCode;
+import plannery.flora.service.BlacklistTokenService;
 
 @Slf4j
 @Component
@@ -26,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String TOKEN_PREFIX = "Bearer ";
 
   private final JwtTokenProvider jwtTokenProvider;
+  private final BlacklistTokenService blacklistTokenService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -35,8 +38,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (StringUtils.hasText(token)) {
       try {
         if (jwtTokenProvider.validateToken(token)) {
-          Authentication authentication = jwtTokenProvider.getAuthentication(token);
-          SecurityContextHolder.getContext().setAuthentication(authentication);
+          if (!blacklistTokenService.isTokenBlacklist(token)) {
+            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+          } else {
+            throw new CustomException(TOKEN_BLACKLISTED);
+          }
         } else {
           throw new CustomException(INVALID_TOKEN);
         }
