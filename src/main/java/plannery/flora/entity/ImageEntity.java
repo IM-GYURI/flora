@@ -1,44 +1,43 @@
 package plannery.flora.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import plannery.flora.enums.UserRole;
+import plannery.flora.enums.ImageType;
 
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "member")
-public class MemberEntity extends BaseEntity {
+@Table(name = "image")
+public class ImageEntity extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private String email;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id", nullable = false)
+  private MemberEntity member;
 
-  @Column(nullable = false)
-  private String password;
+  private String imageUrl;
 
-  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  private UserRole role;
+  private ImageType imageType;
 
-  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ImageEntity> images;
+  public void updateImage(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
 }
