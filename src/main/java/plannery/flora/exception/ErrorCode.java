@@ -10,6 +10,7 @@ public enum ErrorCode {
   INVALID_MEMBER_ID(401, "유효하지 않은 회원 아이디입니다."),
   PASSWORD_NOT_MATCH(400, "비밀번호가 일치하지 않습니다."),
   INVALID_TOKEN(401, "유효하지 않은 토큰입니다."),
+  NO_AUTHORITY(401, "권한이 없습니다."),
   BLACKLIST_TOKEN_ADD_FAILED(500, "블랙리스트 토큰 추가에 실패했습니다."),
   TOKEN_BLACKLISTED(401, "토큰이 블랙리스트에 존재하여 사용할 수 없습니다."),
   INVALID_FILE_FORMAT(400, "지원하지 않는 형식의 파일입니다."),
