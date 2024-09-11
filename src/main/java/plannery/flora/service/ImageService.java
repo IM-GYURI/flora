@@ -4,9 +4,11 @@ import static plannery.flora.enums.ImageType.IMAGE_GALLERY;
 import static plannery.flora.enums.ImageType.IMAGE_PROFILE;
 import static plannery.flora.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static plannery.flora.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static plannery.flora.exception.ErrorCode.NO_AUTHORITY;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,9 +72,14 @@ public class ImageService {
    * @param imageType 이미지 타입 : IMAGE_PROFILE, IMAGE_GALLERY
    * @return 이미지 URL
    */
-  public String uploadImage(MultipartFile file, Long memberId, ImageType imageType) {
-    MemberEntity member = memberRepository.findById(memberId)
+  public String uploadImage(UserDetails userDetails, MultipartFile file, Long memberId,
+      ImageType imageType) {
+    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+    if (!member.getId().equals(memberId)) {
+      throw new CustomException(NO_AUTHORITY);
+    }
 
     ImageEntity imageEntity = imageRepository.findByMemberIdAndImageType(memberId, imageType)
         .orElseGet(() -> ImageEntity.builder()
@@ -104,7 +111,14 @@ public class ImageService {
    * @param imageType 이미지 타입 : IMAGE_PROFILE, IMAGE_GALLERY
    * @return 이미지 URL
    */
-  public String getImage(Long memberId, ImageType imageType) {
+  public String getImage(UserDetails userDetails, Long memberId, ImageType imageType) {
+    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
+        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+    if (!member.getId().equals(memberId)) {
+      throw new CustomException(NO_AUTHORITY);
+    }
+
     return imageRepository.findByMemberIdAndImageType(memberId, imageType)
         .map(ImageEntity::getImageUrl)
         .orElse(null);
@@ -116,7 +130,14 @@ public class ImageService {
    * @param memberId  회원ID
    * @param imageType 이미지 타입 : IMAGE_PROFILE, IMAGE_GALLERY
    */
-  public void deleteImage(Long memberId, ImageType imageType) {
+  public void deleteImage(UserDetails userDetails, Long memberId, ImageType imageType) {
+    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
+        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+    if (!member.getId().equals(memberId)) {
+      throw new CustomException(NO_AUTHORITY);
+    }
+
     ImageEntity imageEntity = imageRepository.findByMemberIdAndImageType(memberId, imageType)
         .orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
 
