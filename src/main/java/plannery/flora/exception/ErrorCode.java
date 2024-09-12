@@ -21,7 +21,8 @@ public enum ErrorCode {
   IMAGE_NOT_FOUND(404, "이미지를 조회하지 못했습니다."),
   SAME_PASSWORD(400, "현재 비밀번호와 새 비밀번호가 같습니다."),
   FAIL_EMAIL_SEND(500, "이메일 전송에 실패했습니다."),
-  PROMISE_NOT_FOUND(404, "다짐 내용이 존재하지 않습니다.");
+  PROMISE_NOT_FOUND(404, "다짐 내용이 존재하지 않습니다."),
+  PROMISE_EXISTS(400, "다짐이 이미 존재합니다.");
 
   private final int status;
   private final String message;

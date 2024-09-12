@@ -1,5 +1,6 @@
 package plannery.flora.service;
 
+import static plannery.flora.exception.ErrorCode.PROMISE_EXISTS;
 import static plannery.flora.exception.ErrorCode.PROMISE_NOT_FOUND;
 
 import java.util.Optional;
@@ -31,6 +32,11 @@ public class PromiseService {
   @Transactional
   public void createPromise(UserDetails userDetails, Long memberId, PromiseDto promiseDto) {
     MemberEntity member = securityUtils.validateUserDetails(userDetails, memberId);
+
+    Optional<PromiseEntity> existingPromise = promiseRepository.findByMemberId(memberId);
+    if (existingPromise.isPresent()) {
+      throw new CustomException(PROMISE_EXISTS);
+    }
 
     PromiseEntity promise = PromiseEntity.builder()
         .member(member)
