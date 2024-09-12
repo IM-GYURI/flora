@@ -93,6 +93,6 @@ public class PromiseService {
     PromiseEntity promise = promiseRepository.findByMemberId(memberId)
         .orElseThrow(() -> new CustomException(PROMISE_NOT_FOUND));
 
-    promiseRepository.deleteById(promise.getId());
+    promiseRepository.delete(promise);
   }
 }
