@@ -18,7 +18,9 @@ public enum ErrorCode {
   S3_UPLOAD_ERROR(500, "S3에 이미지를 업로드하는 중 오류가 발생했습니다."),
   INVALID_IMAGE_URL(400, "유효하지 않은 이미지 url입니다."),
   FAILED_TO_DELETE_IMAGE(500, "이미지 삭제에 실패했습니다."),
-  IMAGE_NOT_FOUND(404, "이미지를 조회하지 못했습니다.");
+  IMAGE_NOT_FOUND(404, "이미지를 조회하지 못했습니다."),
+  SAME_PASSWORD(400, "현재 비밀번호와 새 비밀번호가 같습니다."),
+  FAIL_EMAIL_SEND(500, "이메일 전송에 실패했습니다.");
 
   private final int status;
   private final String message;

@@ -1,17 +1,29 @@
 package plannery.flora.controller;
 
+import static plannery.flora.enums.ResponseMessage.SUCCESS_MEMBER_DELETE;
+import static plannery.flora.enums.ResponseMessage.SUCCESS_PASSWORD_CHANGE;
+import static plannery.flora.enums.ResponseMessage.SUCCESS_SEND_PASSWORD_CHANGE;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_SIGNOUT;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_SIGNUP;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import plannery.flora.dto.member.ChangePasswordDto;
+import plannery.flora.dto.member.MemberInfoDto;
 import plannery.flora.dto.member.SignUpDto;
 import plannery.flora.service.MemberService;
 
@@ -51,5 +63,62 @@ public class MemberController {
     memberService.signOut(token);
 
     return ResponseEntity.ok(SUCCESS_SIGNOUT.getMessage());
+  }
+
+  /**
+   * 회원 정보 조회
+   *
+   * @param userDetails 사용자 정보
+   * @param memberId    회원ID
+   * @return MemberInfoDto : 이메일, 프로필 이미지 URL
+   */
+  @GetMapping("/{memberId}")
+  public ResponseEntity<MemberInfoDto> getMemberInfo(
+      @AuthenticationPrincipal UserDetails userDetails, @PathVariable Long memberId) {
+    return ResponseEntity.ok(memberService.getMemberInfo(userDetails, memberId));
+  }
+
+  /**
+   * 비밀번호 변경
+   *
+   * @param token             JWT 토큰
+   * @param memberId          회원ID
+   * @param changePasswordDto 현재 비밀번호, 새 비밀번호
+   * @return "비밀번호 변경 완료"
+   */
+  @PutMapping("/{memberId}/password")
+  public ResponseEntity<String> changePassword(@RequestParam String token,
+      @PathVariable Long memberId, @RequestBody @Validated ChangePasswordDto changePasswordDto) {
+    memberService.changePassword(token, memberId, changePasswordDto);
+
+    return ResponseEntity.ok(SUCCESS_PASSWORD_CHANGE.getMessage());
+  }
+
+  /**
+   * 비밀번호 찾기 -> 이메일로 비밀번호 변경 url 전송
+   *
+   * @param email 이메일
+   * @return "비밀번호 변경 링크 전송 완료"
+   */
+  @PostMapping("/password")
+  public ResponseEntity<String> passwordChange(@RequestParam String email) {
+    memberService.passwordChange(email);
+
+    return ResponseEntity.ok(SUCCESS_SEND_PASSWORD_CHANGE.getMessage());
+  }
+
+  /**
+   * 회원 탈퇴 : 관련 DB 전체 삭제
+   *
+   * @param userDetails 사용자 정보
+   * @param memberId    회원ID
+   * @return "회원 탈퇴 완료"
+   */
+  @DeleteMapping("/{memberId}")
+  public ResponseEntity<String> deleteMember(@AuthenticationPrincipal UserDetails userDetails,
+      @PathVariable Long memberId) {
+    memberService.deleteMember(userDetails, memberId);
+
+    return ResponseEntity.ok(SUCCESS_MEMBER_DELETE.getMessage());
   }
 }

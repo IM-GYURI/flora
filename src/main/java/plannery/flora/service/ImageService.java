@@ -74,16 +74,12 @@ public class ImageService {
    */
   public String uploadImage(UserDetails userDetails, MultipartFile file, Long memberId,
       ImageType imageType) {
-    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
-        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-    if (!member.getId().equals(memberId)) {
-      throw new CustomException(NO_AUTHORITY);
-    }
+    checkUserDetails(userDetails, memberId);
 
     ImageEntity imageEntity = imageRepository.findByMemberIdAndImageType(memberId, imageType)
         .orElseGet(() -> ImageEntity.builder()
-            .member(member)
+            .member(memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND)))
             .imageType(imageType)
             .build());
 
@@ -112,12 +108,7 @@ public class ImageService {
    * @return 이미지 URL
    */
   public String getImage(UserDetails userDetails, Long memberId, ImageType imageType) {
-    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
-        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-    if (!member.getId().equals(memberId)) {
-      throw new CustomException(NO_AUTHORITY);
-    }
+    checkUserDetails(userDetails, memberId);
 
     return imageRepository.findByMemberIdAndImageType(memberId, imageType)
         .map(ImageEntity::getImageUrl)
@@ -131,12 +122,7 @@ public class ImageService {
    * @param imageType 이미지 타입 : IMAGE_PROFILE, IMAGE_GALLERY
    */
   public void deleteImage(UserDetails userDetails, Long memberId, ImageType imageType) {
-    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
-        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-    if (!member.getId().equals(memberId)) {
-      throw new CustomException(NO_AUTHORITY);
-    }
+    checkUserDetails(userDetails, memberId);
 
     ImageEntity imageEntity = imageRepository.findByMemberIdAndImageType(memberId, imageType)
         .orElseThrow(() -> new CustomException(IMAGE_NOT_FOUND));
@@ -153,6 +139,15 @@ public class ImageService {
         imageEntity.updateImage(defaultGalleryUrl);
         imageRepository.save(imageEntity);
       }
+    }
+  }
+
+  private void checkUserDetails(UserDetails userDetails, Long memberId) {
+    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
+        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+    if (!member.getId().equals(memberId)) {
+      throw new CustomException(NO_AUTHORITY);
     }
   }
 }
