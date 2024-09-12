@@ -45,6 +45,9 @@ public class MemberEntity extends BaseEntity {
   @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<PromiseEntity> promises;
 
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<DiaryEntity> diaries;
+
   public void updatePassword(String newPassword) {
     this.password = newPassword;
   }
