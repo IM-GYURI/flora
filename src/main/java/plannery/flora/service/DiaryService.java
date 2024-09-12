@@ -41,7 +41,7 @@ public class DiaryService {
       DiaryCreateDto diaryCreateDto) {
     MemberEntity member = securityUtils.validateUserDetails(userDetails, memberId);
 
-    boolean isExist = diaryRepository.existsByDate(diaryCreateDto.getDate());
+    boolean isExist = diaryRepository.existsByMemberIdAndDate(memberId, diaryCreateDto.getDate());
 
     if (isExist) {
       throw new CustomException(DIARY_EXISTS);
