@@ -15,7 +15,10 @@ public enum ResponseMessage {
   SUCCESS_MEMBER_DELETE("회원 탈퇴 완료"),
   SUCCESS_PROMISE_CREATE("다짐 생성 완료"),
   SUCCESS_PROMISE_UPDATE("다짐 수정 완료"),
-  SUCCESS_PROMISE_DELETE("다짐 삭제 완료");
+  SUCCESS_PROMISE_DELETE("다짐 삭제 완료"),
+  SUCCESS_DIARY_CREATE("일기 생성 완료"),
+  SUCCESS_DIARY_UPDATE("일기 수정 완료"),
+  SUCCESS_DIARY_DELETE("일기 삭제 완료");
 
   private final String message;
 }
