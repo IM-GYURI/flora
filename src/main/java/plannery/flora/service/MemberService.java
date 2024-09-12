@@ -3,13 +3,23 @@ package plannery.flora.service;
 import static plannery.flora.enums.ImageType.IMAGE_GALLERY;
 import static plannery.flora.enums.ImageType.IMAGE_PROFILE;
 import static plannery.flora.enums.UserRole.ROLE_MEMBER;
+import static plannery.flora.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static plannery.flora.exception.ErrorCode.NO_AUTHORITY;
 import static plannery.flora.exception.ErrorCode.PASSWORD_NOT_MATCH;
+import static plannery.flora.exception.ErrorCode.SAME_PASSWORD;
 
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import plannery.flora.dto.member.ChangePasswordDto;
+import plannery.flora.dto.member.MemberInfoDto;
 import plannery.flora.entity.MemberEntity;
 import plannery.flora.exception.CustomException;
 import plannery.flora.repository.MemberRepository;
@@ -24,7 +34,11 @@ public class MemberService {
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
   private final ImageService imageService;
+  private final EmailService emailService;
   private final BlacklistTokenService blacklistTokenService;
+
+  private static final long TEMP_TOKEN_EXPIRATION_TIME = 300; // 5min
+  private static final String CHANGE_PASSWORD_URL = "http://localhost:8080/members/";
 
   /**
    * 회원가입 & 로그인
@@ -77,5 +91,99 @@ public class MemberService {
    */
   public void signOut(String token) {
     blacklistTokenService.addToBlacklist(token);
+  }
+
+  /**
+   * 회원 정보 조회
+   *
+   * @param userDetails 사용자 정보
+   * @param memberId    회원ID
+   * @return MemberInfoDto : 이메일, 프로필 이미지 URL
+   */
+  public MemberInfoDto getMemberInfo(UserDetails userDetails, Long memberId) {
+    return MemberInfoDto.builder()
+        .email(userDetails.getUsername())
+        .imageUrl(imageService.getImage(userDetails, memberId, IMAGE_PROFILE))
+        .build();
+  }
+
+  /**
+   * 비밀번호 변경
+   *
+   * @param token             JWT 토큰
+   * @param memberId          회원ID
+   * @param changePasswordDto : 현재 비밀번호, 새 비밀번호
+   */
+  @Transactional
+  public void changePassword(String token, Long memberId,
+      ChangePasswordDto changePasswordDto) {
+    Authentication authentication = jwtTokenProvider.getAuthentication(token);
+
+    MemberEntity member = memberRepository.findByEmail(authentication.getName())
+        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+    if (!member.getId().equals(memberId)) {
+      throw new CustomException(NO_AUTHORITY);
+    }
+
+    if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), member.getPassword())) {
+      throw new CustomException(PASSWORD_NOT_MATCH);
+    }
+
+    if (changePasswordDto.getOldPassword().equals(changePasswordDto.getNewPassword())) {
+      throw new CustomException(SAME_PASSWORD);
+    }
+
+    member.updatePassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+  }
+
+  /**
+   * 비밀번호 찾기 -> 이메일로 비밀번호 변경 url 전송
+   *
+   * @param email 이메일
+   */
+  public void passwordChange(String email) {
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+    String tempToken = jwtTokenProvider.generateToken(member.getId(), member.getEmail(),
+        member.getRole());
+
+    scheduleTokenBlacklist(tempToken);
+
+    emailService.sendPasswordChangeEmail(email,
+        CHANGE_PASSWORD_URL + member.getId() + "/password?token=" + tempToken);
+  }
+
+  /**
+   * 임시 토큰 블랙리스트 등록 스케줄링 (5분)
+   *
+   * @param token 임시 토큰
+   */
+  private void scheduleTokenBlacklist(String token) {
+    new Timer().schedule(new TimerTask() {
+      @Override
+      public void run() {
+        blacklistTokenService.addToBlacklist(token);
+      }
+    }, MemberService.TEMP_TOKEN_EXPIRATION_TIME * 1000L);
+  }
+
+  /**
+   * 회원 탈퇴 : 관련 DB 전체 삭제
+   *
+   * @param userDetails 사용자 정보
+   * @param memberId    회원ID
+   */
+  @Transactional
+  public void deleteMember(UserDetails userDetails, Long memberId) {
+    MemberEntity member = memberRepository.findByEmail(userDetails.getUsername())
+        .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+    if (!member.getId().equals(memberId)) {
+      throw new CustomException(NO_AUTHORITY);
+    }
+
+    memberRepository.delete(member);
   }
 }
