@@ -18,8 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import plannery.flora.dto.member.ChangePasswordDto;
+import plannery.flora.component.S3ImageUpload;
 import plannery.flora.dto.member.MemberInfoDto;
+import plannery.flora.dto.member.PasswordChangeDto;
 import plannery.flora.entity.MemberEntity;
 import plannery.flora.exception.CustomException;
 import plannery.flora.repository.MemberRepository;
@@ -33,6 +34,7 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
+  private final S3ImageUpload s3ImageUpload;
   private final ImageService imageService;
   private final EmailService emailService;
   private final BlacklistTokenService blacklistTokenService;
@@ -112,11 +114,11 @@ public class MemberService {
    *
    * @param token             JWT 토큰
    * @param memberId          회원ID
-   * @param changePasswordDto : 현재 비밀번호, 새 비밀번호
+   * @param passwordChangeDto : 현재 비밀번호, 새 비밀번호
    */
   @Transactional
   public void changePassword(String token, Long memberId,
-      ChangePasswordDto changePasswordDto) {
+      PasswordChangeDto passwordChangeDto) {
     Authentication authentication = jwtTokenProvider.getAuthentication(token);
 
     MemberEntity member = memberRepository.findByEmail(authentication.getName())
@@ -126,15 +128,15 @@ public class MemberService {
       throw new CustomException(NO_AUTHORITY);
     }
 
-    if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), member.getPassword())) {
+    if (!passwordEncoder.matches(passwordChangeDto.getOldPassword(), member.getPassword())) {
       throw new CustomException(PASSWORD_NOT_MATCH);
     }
 
-    if (changePasswordDto.getOldPassword().equals(changePasswordDto.getNewPassword())) {
+    if (passwordChangeDto.getOldPassword().equals(passwordChangeDto.getNewPassword())) {
       throw new CustomException(SAME_PASSWORD);
     }
 
-    member.updatePassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+    member.updatePassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
   }
 
   /**
@@ -183,6 +185,8 @@ public class MemberService {
     if (!member.getId().equals(memberId)) {
       throw new CustomException(NO_AUTHORITY);
     }
+
+    s3ImageUpload.deleteAllImages(memberId);
 
     memberRepository.delete(member);
   }
