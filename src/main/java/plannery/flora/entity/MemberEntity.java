@@ -48,6 +48,12 @@ public class MemberEntity extends BaseEntity {
   @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<DiaryEntity> diaries;
 
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<NotificationListEntity> notifications;
+
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<EventEntity> events;
+
   public void updatePassword(String newPassword) {
     this.password = newPassword;
   }
