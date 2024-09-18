@@ -6,6 +6,7 @@ import static plannery.flora.enums.ResponseMessage.SUCCESS_SEND_PASSWORD_CHANGE;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_SIGNOUT;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_SIGNUP;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import plannery.flora.dto.member.ChangePasswordDto;
 import plannery.flora.dto.member.MemberInfoDto;
+import plannery.flora.dto.member.PasswordChangeDto;
 import plannery.flora.dto.member.SignUpDto;
 import plannery.flora.service.MemberService;
 
@@ -41,7 +42,7 @@ public class MemberController {
    * @return JWT 토큰 & "회원가입 완료"
    */
   @PostMapping("/signup")
-  public ResponseEntity<String> signUp(@RequestBody @Validated SignUpDto signUpDto) {
+  public ResponseEntity<String> signUp(@RequestBody @Valid SignUpDto signUpDto) {
     String token = memberService.signUpOrSignIn(signUpDto.getEmail(), signUpDto.getPassword());
 
     HttpHeaders httpHeaders = new HttpHeaders();
@@ -83,13 +84,13 @@ public class MemberController {
    *
    * @param token             JWT 토큰
    * @param memberId          회원ID
-   * @param changePasswordDto 현재 비밀번호, 새 비밀번호
+   * @param passwordChangeDto 현재 비밀번호, 새 비밀번호
    * @return "비밀번호 변경 완료"
    */
   @PutMapping("/{memberId}/password")
   public ResponseEntity<String> changePassword(@RequestParam String token,
-      @PathVariable Long memberId, @RequestBody @Validated ChangePasswordDto changePasswordDto) {
-    memberService.changePassword(token, memberId, changePasswordDto);
+      @PathVariable Long memberId, @RequestBody @Validated PasswordChangeDto passwordChangeDto) {
+    memberService.changePassword(token, memberId, passwordChangeDto);
 
     return ResponseEntity.ok(SUCCESS_PASSWORD_CHANGE.getMessage());
   }
