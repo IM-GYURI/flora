@@ -18,6 +18,8 @@ import plannery.flora.exception.CustomException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Component
@@ -76,6 +78,11 @@ public class S3ImageUpload {
     return String.format("https://%s.s3.amazonaws.com/%s", bucketName, key);
   }
 
+  /**
+   * 이미지 파일 삭제
+   *
+   * @param imageUrl 이미지 Url
+   */
   public void deleteImage(String imageUrl) {
     try {
       String key = extractKeyFromUrl(imageUrl);
@@ -98,5 +105,32 @@ public class S3ImageUpload {
     } else {
       throw new CustomException(INVALID_IMAGE_URL);
     }
+  }
+
+  /**
+   * 회원과 관련된 이미지 전체 삭제
+   *
+   * @param memberId 회원ID
+   */
+  public void deleteAllImages(Long memberId) {
+    String folderKey = memberId + "/";
+
+    ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
+        .bucket(bucketName)
+        .prefix(folderKey)
+        .build();
+
+    ListObjectsV2Response listObjectsV2Response = s3Client.listObjectsV2(listObjectsV2Request);
+
+    listObjectsV2Response.contents().forEach(s3Object -> {
+      String key = s3Object.key();
+
+      DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+          .bucket(bucketName)
+          .key(key)
+          .build();
+
+      s3Client.deleteObject(deleteObjectRequest);
+    });
   }
 }
