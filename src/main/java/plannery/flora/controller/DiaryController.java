@@ -4,6 +4,7 @@ import static plannery.flora.enums.ResponseMessage.SUCCESS_DIARY_CREATE;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_DIARY_DELETE;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_DIARY_UPDATE;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,7 @@ public class DiaryController {
   @PostMapping("/diary")
   public ResponseEntity<String> createDiary(@AuthenticationPrincipal UserDetails userDetails,
       @RequestParam("file") MultipartFile file, @PathVariable Long memberId,
-      @RequestPart DiaryCreateDto diaryCreateDto) {
+      @RequestPart @Valid DiaryCreateDto diaryCreateDto) {
     diaryService.createDiary(userDetails, memberId, file, diaryCreateDto);
 
     return ResponseEntity.ok(SUCCESS_DIARY_CREATE.getMessage());
