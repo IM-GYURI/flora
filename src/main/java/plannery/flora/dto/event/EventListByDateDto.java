@@ -1,5 +1,6 @@
 package plannery.flora.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,9 @@ public class EventListByDateDto {
   private LocalTime startTime;
 
   private LocalTime endTime;
+
+  @JsonProperty("isAllDay")
+  private boolean isAllDay;
 
   private String indexColor;
 }
