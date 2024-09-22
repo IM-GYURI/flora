@@ -32,4 +32,8 @@ public class EventCreateDto {
   @JsonProperty("isDDay")
   @NotNull(message = "디데이 설정 여부는 빈 값일 수 없습니다.")
   private boolean isDDay;
+
+  @JsonProperty("isAllDay")
+  @NotNull(message = "하루종일 설정 여부는 빈 값일 수 없습니다.")
+  private boolean isAllDay;
 }
