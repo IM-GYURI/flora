@@ -36,7 +36,7 @@ public class MemberController {
   private final MemberService memberService;
 
   /**
-   * 회원가입 or 로그인 후 JWT 토큰 발급
+   * 회원가입 or 로그인 후 JWT 토큰 발급 : 회원용
    *
    * @param signUpDto 회원가입 or 로그인 정보
    * @return JWT 토큰 & "회원가입 완료"
@@ -54,14 +54,34 @@ public class MemberController {
   }
 
   /**
+   * 회원가입 or 로그인 후 JWT 토큰 발급 : 관리자용
+   *
+   * @param signUpDto 회원가입 or 로그인 정보
+   * @return JWT 토큰 & "회원가입 완료"
+   */
+  @PostMapping("/signup/admin")
+  public ResponseEntity<String> signUpForAdmin(@RequestBody @Valid SignUpDto signUpDto) {
+    String token = memberService.signUpOrSignInForAdmin(signUpDto.getEmail(),
+        signUpDto.getPassword());
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+
+    return ResponseEntity.ok()
+        .headers(httpHeaders)
+        .body(SUCCESS_SIGNUP.getMessage());
+  }
+
+  /**
    * 로그아웃
    *
    * @param token 토큰 정보
    * @return "로그아웃 성공"
    */
-  @PostMapping("/signout")
-  public ResponseEntity<String> signOut(@RequestHeader("Authorization") String token) {
-    memberService.signOut(token);
+  @PostMapping("/{memberId}/signout")
+  public ResponseEntity<String> signOut(@RequestHeader("Authorization") String token,
+      @PathVariable Long memberId) {
+    memberService.signOut(token, memberId);
 
     return ResponseEntity.ok(SUCCESS_SIGNOUT.getMessage());
   }

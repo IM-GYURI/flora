@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import plannery.flora.dto.event.DDayDto;
 import plannery.flora.dto.event.EventCreateDto;
 import plannery.flora.dto.event.EventListByDateDto;
-import plannery.flora.dto.event.EventListByMonthDto;
+import plannery.flora.dto.event.EventListDto;
 import plannery.flora.service.EventService;
 
 @RestController
@@ -73,7 +73,7 @@ public class EventController {
    * @param date        오늘 날짜
    * @return List<EventListDto> : 이벤트ID, 제목, 시작시간, 종료시간, 인덱스
    */
-  @GetMapping
+  @GetMapping("/date")
   public ResponseEntity<List<EventListByDateDto>> getEventsByDate(
       @AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long memberId,
@@ -90,10 +90,24 @@ public class EventController {
    * @return List<EventListByMonthDto> : 이벤트ID, 제목, 시작날짜, 종료날짜, 인덱스
    */
   @GetMapping("/month")
-  public ResponseEntity<List<EventListByMonthDto>> getEventsByMonth(
+  public ResponseEntity<List<EventListDto>> getEventsByMonth(
       @AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long memberId, @RequestParam("yearMonth") String yearMonth) {
     return ResponseEntity.ok(eventService.getEventsByMonth(userDetails, memberId, yearMonth));
+  }
+
+  /**
+   * 이벤트 전체 조회
+   *
+   * @param userDetails 사용자 정보
+   * @param memberId    회원ID
+   * @return List<EventListDto> : 이벤트ID, 제목, 시작일시, 종료일시, 인덱스, 하루종일 설정 여부
+   */
+  @GetMapping
+  public ResponseEntity<List<EventListDto>> getAllEvent(
+      @AuthenticationPrincipal UserDetails userDetails,
+      @PathVariable Long memberId) {
+    return ResponseEntity.ok(eventService.getAllEvent(userDetails, memberId));
   }
 
   /**
