@@ -44,17 +44,21 @@ public class EventEntity extends BaseEntity {
   @Column(nullable = false)
   private boolean isDDay;
 
+  @Column(nullable = false)
+  private boolean isAllDay;
+
   @ManyToOne
   @JoinColumn(name = "member_id", nullable = false)
   private MemberEntity member;
 
   public void updateEvent(String newTitle, String newDescription, LocalDateTime newStartDateTime,
-      LocalDateTime newEndDateTime, String newIndexColor, boolean newDDay) {
+      LocalDateTime newEndDateTime, String newIndexColor, boolean newIsDDay, boolean newIsAllDay) {
     this.title = newTitle;
     this.description = newDescription;
     this.startDateTime = newStartDateTime;
     this.endDateTime = newEndDateTime;
     this.indexColor = newIndexColor;
-    this.isDDay = newDDay;
+    this.isDDay = newIsDDay;
+    this.isAllDay = newIsAllDay;
   }
 }
