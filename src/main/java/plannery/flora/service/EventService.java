@@ -19,7 +19,7 @@ import plannery.flora.component.SecurityUtils;
 import plannery.flora.dto.event.DDayDto;
 import plannery.flora.dto.event.EventCreateDto;
 import plannery.flora.dto.event.EventListByDateDto;
-import plannery.flora.dto.event.EventListByMonthDto;
+import plannery.flora.dto.event.EventListDto;
 import plannery.flora.entity.EventEntity;
 import plannery.flora.entity.MemberEntity;
 import plannery.flora.exception.CustomException;
@@ -38,7 +38,7 @@ public class EventService {
    *
    * @param userDetails    사용자 정보
    * @param memberId       회원ID
-   * @param eventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부
+   * @param eventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부, 하루종일 설정 여부
    */
   public void createEvent(UserDetails userDetails, Long memberId, EventCreateDto eventCreateDto) {
     MemberEntity member = securityUtils.validateUserDetails(userDetails, memberId);
@@ -54,6 +54,7 @@ public class EventService {
         .endDateTime(eventCreateDto.getEndDateTime())
         .indexColor(eventCreateDto.getIndexColor())
         .isDDay(eventCreateDto.isDDay())
+        .isAllDay(eventCreateDto.isAllDay())
         .member((member))
         .build();
 
@@ -66,7 +67,7 @@ public class EventService {
    * @param userDetails 사용자 정보
    * @param memberId    회원ID
    * @param eventId     이벤트ID
-   * @return EventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부
+   * @return EventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부, 하루종일 설정 여부
    */
   public EventCreateDto getEvent(UserDetails userDetails, Long memberId, Long eventId) {
     securityUtils.validateUserDetails(userDetails, memberId);
@@ -81,6 +82,7 @@ public class EventService {
         .endDateTime(event.getEndDateTime())
         .indexColor(event.getIndexColor())
         .isDDay(event.isDDay())
+        .isAllDay(event.isAllDay())
         .build();
   }
 
@@ -90,14 +92,17 @@ public class EventService {
    * @param userDetails 사용자 정보
    * @param memberId    회원ID
    * @param date        오늘 날짜
-   * @return List<EventListDto> : 이벤트ID, 제목, 시작시간, 종료시간, 인덱스
+   * @return List<EventListDto> : 이벤트ID, 제목, 시작시간, 종료시간, 인덱스, 하루종일 설정 여부
    */
   public List<EventListByDateDto> getEventsByDate(UserDetails userDetails, Long memberId,
       LocalDate date) {
     securityUtils.validateUserDetails(userDetails, memberId);
 
-    List<EventEntity> eventList = eventRepository.findAllByMemberIdAndStartDateTimeLessThanEqualAndEndDateTimeGreaterThanEqual(
-        memberId, date.atStartOfDay(), date.atTime(23, 59, 59));
+    LocalDateTime startOfDay = date.atStartOfDay();
+    LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+    List<EventEntity> eventList = eventRepository.findAllByMemberIdAndStartDateTimeLessThanEqualAndEndDateTimeGreaterThanEqualOrStartDateTimeBetweenOrEndDateTimeBetween(
+        memberId, endOfDay, startOfDay, startOfDay, endOfDay, startOfDay, endOfDay);
 
     return eventList.stream()
         .map(event -> EventListByDateDto.builder()
@@ -105,6 +110,7 @@ public class EventService {
             .title(event.getTitle())
             .startTime(event.getStartDateTime().toLocalTime())
             .endTime(event.getEndDateTime().toLocalTime())
+            .isAllDay(event.isAllDay())
             .indexColor(event.getIndexColor()).build())
         .toList();
   }
@@ -115,9 +121,9 @@ public class EventService {
    * @param userDetails 사용자 정보
    * @param memberId    회원ID
    * @param yearMonth   연월 e.g. "2024-09"
-   * @return List<EventListByMonthDto> : 이벤트ID, 제목, 시작날짜, 종료날짜, 인덱스
+   * @return List<EventListByMonthDto> : 이벤트ID, 제목, 시작날짜, 종료날짜, 인덱스, 하루종일 설정 여부
    */
-  public List<EventListByMonthDto> getEventsByMonth(UserDetails userDetails, Long memberId,
+  public List<EventListDto> getEventsByMonth(UserDetails userDetails, Long memberId,
       String yearMonth) {
     securityUtils.validateUserDetails(userDetails, memberId);
 
@@ -132,12 +138,39 @@ public class EventService {
         startDateTime, endDateTime);
 
     return eventList.stream()
-        .map(event -> EventListByMonthDto.builder()
+        .map(event -> EventListDto.builder()
             .eventId(event.getId())
             .title(event.getTitle())
-            .startDate(event.getStartDateTime().toLocalDate())
-            .endDate(event.getEndDateTime().toLocalDate())
-            .indexColor(event.getIndexColor()).build())
+            .startDateTime(event.getStartDateTime())
+            .endDateTime(event.getEndDateTime())
+            .indexColor(event.getIndexColor())
+            .isAllDay(event.isAllDay())
+            .build())
+        .toList();
+  }
+
+  /**
+   * 이벤트 전체 조회
+   *
+   * @param userDetails 사용자 정보
+   * @param memberId    회원ID
+   * @return List<EventListDto> : 이벤트ID, 제목, 시작일시, 종료일시, 인덱스, 하루종일 설정 여부
+   */
+  public List<EventListDto> getAllEvent(UserDetails userDetails, Long memberId) {
+    securityUtils.validateUserDetails(userDetails, memberId);
+
+    List<EventEntity> eventList = eventRepository.findAllByMemberId(memberId);
+
+    return eventList.stream()
+        .map(event -> EventListDto.builder()
+            .eventId(event.getId())
+            .title(event.getTitle())
+            .startDateTime(event.getStartDateTime())
+            .endDateTime(event.getEndDateTime())
+            .indexColor(event.getIndexColor())
+            .isAllDay(event.isAllDay())
+            .build())
+        .sorted(Comparator.comparing(EventListDto::getStartDateTime))
         .toList();
   }
 
@@ -172,7 +205,7 @@ public class EventService {
    * @param userDetails    사용자 정보
    * @param memberId       회원ID
    * @param eventId        이벤트 ID
-   * @param eventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부
+   * @param eventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부, 하루종일 설정 여부
    */
   public void updateEvent(UserDetails userDetails, Long memberId, Long eventId,
       EventCreateDto eventCreateDto) {
@@ -187,7 +220,7 @@ public class EventService {
 
     event.updateEvent(eventCreateDto.getTitle(), eventCreateDto.getDescription(),
         eventCreateDto.getStartDateTime(), eventCreateDto.getEndDateTime(),
-        eventCreateDto.getIndexColor(), eventCreateDto.isDDay());
+        eventCreateDto.getIndexColor(), eventCreateDto.isDDay(), eventCreateDto.isAllDay());
   }
 
   /**
