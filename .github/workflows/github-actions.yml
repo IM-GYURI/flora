@@ -53,5 +53,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/flora_application
-            docker-compose up -d --no-deps app
+            docker compose up -d --no-deps app
             docker image prune -f
