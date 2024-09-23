@@ -52,6 +52,8 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            pwd  # 현재 작업 디렉토리 출력
+            ls   # 현재 디렉토리의 파일 목록 출력
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/flora_application
             docker-compose up -d --no-deps app
             docker image prune -f
