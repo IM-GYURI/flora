@@ -9,8 +9,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/flora  # MariaDB 연결 URL
       SPRING_DATA_REDIS_HOST: redis  # Redis 연결 호스트
     depends_on:
-      - db  # db 서비스가 먼저 실행되도록 설정
-      - redis  # redis 서비스가 먼저 실행되도록 설정
+      - ubuntu-db-1  # db 서비스가 먼저 실행되도록 설정
+      - ubuntu-redis-1  # redis 서비스가 먼저 실행되도록 설정
     networks:
       - app-network
 
