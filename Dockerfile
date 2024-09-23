@@ -17,8 +17,8 @@ RUN ./gradlew build -x test  # 소스 코드 복사 전에 빌드
 # 5. 소스 코드 복사
 COPY src ./src
 
-# 6. application.yml 복사
-COPY src/main/resources/application.yml ./src/main/resources/
+# 6. resources 디렉토리 복사
+COPY src/main/resources/ src/main/resources/
 
 # 7. 빌드
 RUN ./gradlew build -x test
