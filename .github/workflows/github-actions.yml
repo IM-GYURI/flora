@@ -9,6 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,6 +22,10 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Create application.yml from secret
+        run: |
+          echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
 
       - name: Clean and build without tests
         run: ./gradlew clean build -x test
@@ -44,6 +49,12 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # 기존 app 컨테이너 중지 및 삭제
+            docker-compose down app
+
+            # 최신 앱 컨테이너 이미지를 가져와서 실행
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/flora_application
-            docker-compose up -d --no-deps app
+            docker-compose -f docker-compose.yml up -d --no-deps app
+
+            # 불필요한 이미지 제거
             docker image prune -f
