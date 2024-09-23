@@ -38,5 +38,4 @@ out/
 
 src/main/resources/
 img
-docker-compose.yml
 docker-compose-db.yml
