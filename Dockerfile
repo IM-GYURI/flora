@@ -5,10 +5,10 @@ FROM openjdk:17-oracle
 WORKDIR /app
 
 # 3. Gradle Wrapper와 build.gradle, settings.gradle 복사
-COPY gradlew .
-COPY gradle ./gradle
-COPY build.gradle .
-COPY settings.gradle .
+COPY gradlew ./
+COPY gradle ./gradle/
+COPY build.gradle ./
+COPY settings.gradle ./
 
 # 4. 의존성 다운로드
 RUN chmod +x ./gradlew && ./gradlew dependencies
