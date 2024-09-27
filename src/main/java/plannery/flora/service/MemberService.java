@@ -37,6 +37,7 @@ public class MemberService {
   private final S3ImageUpload s3ImageUpload;
   private final ImageService imageService;
   private final EmailService emailService;
+  private final FloraService floraService;
   private final NotificationService notificationService;
   private final BlacklistTokenService blacklistTokenService;
 
@@ -61,6 +62,9 @@ public class MemberService {
       if (passwordEncoder.matches(password, member.getPassword())) {
         // 비밀번호가 일치하는 경우 : 로그인 성공
         log.info("로그인 성공");
+
+        floraService.updateFloraOnLogin(member.getId());
+
         return jwtTokenProvider.generateToken(member.getId(), member.getEmail(),
             member.getRole());
       } else {
@@ -79,6 +83,7 @@ public class MemberService {
 
       memberRepository.save(newMember);
       imageService.createDefaultImage(newMember.getId());
+      floraService.createMyFlora(newMember.getId());
 
       return jwtTokenProvider.generateToken(newMember.getId(), newMember.getEmail(),
           newMember.getRole());
