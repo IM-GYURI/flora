@@ -26,7 +26,9 @@ public enum ErrorCode {
   DIARY_NOT_FOUND(404, "해당 일기가 존재하지 않습니다."),
   DIARY_EXISTS(400, "해당 날짜에 일기가 이미 존재합니다."),
   EVENT_NOT_FOUND(404, "해당 이벤트가 존재하지 않습니다."),
-  INVALID_DATETIME(400, "종료일시는 시작일시보다 앞설 수 없습니다.");
+  INVALID_DATETIME(400, "종료일시는 시작일시보다 앞설 수 없습니다."),
+  FLORA_NOT_FOUND(404, "해당 회원의 플로라를 찾을 수 없습니다."),
+  FLORA_EXISTS(400, "플로라가 이미 존재합니다.");
 
   private final int status;
   private final String message;
