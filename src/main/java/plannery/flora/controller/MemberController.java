@@ -119,7 +119,7 @@ public class MemberController {
    * 비밀번호 찾기 -> 이메일로 임시 비밀번호 발급
    *
    * @param email 이메일
-   * @return "비밀번호 변경 링크 전송 완료"
+   * @return "임시 비밀번호 전송 완료"
    */
   @PostMapping("/password")
   public ResponseEntity<String> passwordChange(@RequestParam String email) {
