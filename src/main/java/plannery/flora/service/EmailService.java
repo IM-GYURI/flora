@@ -21,23 +21,22 @@ public class EmailService {
   private String from;
 
   /**
-   * 비밀번호 변경 url 전송
+   * 임시 비밀번호 전송
    *
-   * @param to       받는 사람 이메일
-   * @param resetUrl 비밀번호 변경 url
+   * @param to             받는 사람 이메일
+   * @param randomPassword 임시 비밀번호
    */
-  public void sendPasswordChangeEmail(String to, String resetUrl) {
+  public void sendPasswordChangeEmail(String to, String randomPassword) {
     try {
       MimeMessage message = mailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
       helper.setTo(to);
       helper.setFrom(from);
-      helper.setSubject("플로라 : 비밀번호 변경");
+      helper.setSubject("플로라 : 임시 비밀번호 발급");
 
-      String htmlContent = "<p>아래 링크를 통해 비밀번호를 변경하세요:</p>" +
-          "<p><a href=\"" + resetUrl + "\">비밀번호 변경 링크</a></p>" +
-          "<p>이 링크는 5분 동안만 유효합니다. 시간이 지나면 링크가 만료되어 사용할 수 없으니, 가능한 빨리 비밀번호를 변경해 주세요.</p>";
+      String htmlContent =
+          "<p>새로운 비밀번호를 발급하였습니다. 회원님의 임시 비밀번호는 <b>" + randomPassword + "</b>입니다.</p>";
 
       helper.setText(htmlContent, true);
 
