@@ -27,7 +27,7 @@ import plannery.flora.service.DiaryService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members/{memberId}")
+@RequestMapping("/members/{memberId}/diaries")
 public class DiaryController {
 
   private final DiaryService diaryService;
@@ -41,7 +41,7 @@ public class DiaryController {
    * @param diaryCreateDto : 제목, 내용, 날짜
    * @return "일기 생성 완료"
    */
-  @PostMapping("/diary")
+  @PostMapping
   public ResponseEntity<String> createDiary(@AuthenticationPrincipal UserDetails userDetails,
       @RequestParam("file") MultipartFile file, @PathVariable Long memberId,
       @RequestPart @Valid DiaryCreateDto diaryCreateDto) {
@@ -58,7 +58,7 @@ public class DiaryController {
    * @param diaryId     일기ID
    * @return DiaryViewDto : 제목, 내용, 날짜, 이미지 URL
    */
-  @GetMapping("/diary/{diaryId}")
+  @GetMapping("/{diaryId}")
   public ResponseEntity<DiaryViewDto> getDiary(@AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long memberId, @PathVariable Long diaryId) {
     return ResponseEntity.ok(diaryService.getDiary(userDetails, memberId, diaryId));
@@ -71,7 +71,7 @@ public class DiaryController {
    * @param memberId    회원ID
    * @return List<DiaryListDto> : 일기ID, 제목, 날짜
    */
-  @GetMapping("/diaries")
+  @GetMapping("/list")
   public ResponseEntity<List<DiaryListDto>> getDiaries(
       @AuthenticationPrincipal UserDetails userDetails, @PathVariable Long memberId) {
     return ResponseEntity.ok(diaryService.getDiaries(userDetails, memberId));
@@ -87,7 +87,7 @@ public class DiaryController {
    * @param file           이미지 파일
    * @return "일기 수정 완료"
    */
-  @PutMapping("/diary/{diaryId}")
+  @PutMapping("/{diaryId}")
   public ResponseEntity<String> updateDiary(@AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long memberId, @PathVariable Long diaryId,
       @RequestPart DiaryCreateDto diaryCreateDto, @RequestParam("file") MultipartFile file) {
@@ -104,7 +104,7 @@ public class DiaryController {
    * @param diaryId     일기ID
    * @return "일기 삭제 완료"
    */
-  @DeleteMapping("/diary/{diaryId}")
+  @DeleteMapping("/{diaryId}")
   public ResponseEntity<String> deleteDiary(@AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long memberId, @PathVariable Long diaryId) {
     diaryService.deleteDiary(userDetails, memberId, diaryId);
