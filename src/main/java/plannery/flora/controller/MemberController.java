@@ -116,7 +116,7 @@ public class MemberController {
   }
 
   /**
-   * 비밀번호 찾기 -> 이메일로 비밀번호 변경 url 전송
+   * 비밀번호 찾기 -> 이메일로 임시 비밀번호 발급
    *
    * @param email 이메일
    * @return "비밀번호 변경 링크 전송 완료"
