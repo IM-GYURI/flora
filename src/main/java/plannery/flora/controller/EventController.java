@@ -40,8 +40,8 @@ public class EventController {
    *
    * @param userDetails    사용자 정보
    * @param memberId       회원ID
-   * @param eventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부
-   * @return
+   * @param eventCreateDto : 제목, 설명, 시작일시, 종료일시, 인덱스, 디데이 설정 여부, 하루종일 설정 여부
+   * @return "이벤트 생성 완료"
    */
   @PostMapping
   public ResponseEntity<String> createEvent(@AuthenticationPrincipal UserDetails userDetails,
