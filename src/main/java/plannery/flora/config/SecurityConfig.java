@@ -54,18 +54,18 @@ public class SecurityConfig {
 
             .requestMatchers(HttpMethod.GET, "/members/{memberId}").hasRole("MEMBER")
 
-            .requestMatchers(HttpMethod.DELETE, "/members/{memberId}").hasAnyRole("MEMBER", "ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/members/{memberId}").hasAnyRole("MEMBER")
             .requestMatchers(HttpMethod.PUT, "/members/{memberId}/password")
             .hasAnyRole("MEMBER", "ADMIN")
             .requestMatchers(HttpMethod.POST, "/members/{memberId}/signout")
             .hasAnyRole("MEMBER", "ADMIN")
 
-            .requestMatchers("/notifications/subscribe", "/notifications/{memberId}")
+            .requestMatchers("/notifications/subscribe")
             .hasRole("MEMBER")
 
-            .requestMatchers("/members/**").hasRole("MEMBER")
-
             .requestMatchers("/notifications/**").hasRole("ADMIN")
+
+            .requestMatchers("/members/**").hasRole("MEMBER")
 
             .anyRequest().authenticated())
 

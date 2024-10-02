@@ -21,7 +21,7 @@ import plannery.flora.service.PromiseService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members/{memberId}/promise")
+@RequestMapping("/members/{memberId}/promises")
 public class PromiseController {
 
   private final PromiseService promiseService;

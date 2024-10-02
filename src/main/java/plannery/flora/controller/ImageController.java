@@ -20,7 +20,7 @@ import plannery.flora.service.ImageService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members/{memberId}/image")
+@RequestMapping("/members/{memberId}/images")
 public class ImageController {
 
   private final ImageService imageService;
