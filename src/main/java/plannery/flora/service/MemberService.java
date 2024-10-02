@@ -7,6 +7,7 @@ import static plannery.flora.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static plannery.flora.exception.ErrorCode.NO_AUTHORITY;
 import static plannery.flora.exception.ErrorCode.PASSWORD_NOT_MATCH;
 import static plannery.flora.exception.ErrorCode.SAME_PASSWORD;
+import static plannery.flora.util.RandomGenerator.generateTemporaryPassword;
 
 import java.util.Optional;
 import java.util.Timer;
@@ -42,7 +43,6 @@ public class MemberService {
   private final BlacklistTokenService blacklistTokenService;
 
   private static final long TEMP_TOKEN_EXPIRATION_TIME = 300; // 5min
-  private static final String CHANGE_PASSWORD_URL = "http://localhost:8080/members/";
 
   /**
    * 회원가입 & 로그인 : 회원용
@@ -186,7 +186,7 @@ public class MemberService {
   }
 
   /**
-   * 비밀번호 찾기 -> 이메일로 비밀번호 변경 url 전송
+   * 비밀번호 찾기 -> 이메일로 임시 비밀번호 전송
    *
    * @param email 이메일
    */
@@ -194,13 +194,12 @@ public class MemberService {
     MemberEntity member = memberRepository.findByEmail(email)
         .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-    String tempToken = jwtTokenProvider.generateToken(member.getId(), member.getEmail(),
-        member.getRole());
+    String temporaryPassword = generateTemporaryPassword();
 
-    scheduleTokenBlacklist(tempToken);
+    member.updatePassword(passwordEncoder.encode(temporaryPassword));
+    memberRepository.save(member);
 
-    emailService.sendPasswordChangeEmail(email,
-        CHANGE_PASSWORD_URL + member.getId() + "/password?token=" + tempToken);
+    emailService.sendPasswordChangeEmail(email, temporaryPassword);
   }
 
   /**
