@@ -28,7 +28,9 @@ public enum ErrorCode {
   EVENT_NOT_FOUND(404, "해당 이벤트가 존재하지 않습니다."),
   INVALID_DATETIME(400, "종료일시는 시작일시보다 앞설 수 없습니다."),
   FLORA_NOT_FOUND(404, "해당 회원의 플로라를 찾을 수 없습니다."),
-  FLORA_EXISTS(400, "플로라가 이미 존재합니다.");
+  FLORA_EXISTS(400, "플로라가 이미 존재합니다."),
+  TODO_NOT_FOUND(404, "투두 엔티티가 존재하지 않습니다."),
+  TODO_REPEAT_NOT_FOUND(404, "투두 반복 엔티티가 존재하지 않습니다.");
 
   private final int status;
   private final String message;
