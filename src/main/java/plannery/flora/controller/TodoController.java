@@ -25,7 +25,7 @@ import plannery.flora.service.TodoService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members/{memberId}/todo")
+@RequestMapping("/members/{memberId}/todos")
 public class TodoController {
 
   private final TodoService todoService;
