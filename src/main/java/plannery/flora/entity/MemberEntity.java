@@ -57,6 +57,12 @@ public class MemberEntity extends BaseEntity {
   @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FloraEntity> floras;
 
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<TodoEntity> todos;
+
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<TodoRepeatEntity> todoRepeats;
+
   public void updatePassword(String newPassword) {
     this.password = newPassword;
   }
