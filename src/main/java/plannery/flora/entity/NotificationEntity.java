@@ -23,7 +23,7 @@ public class NotificationEntity extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "TEXT")
   private String message;
 
   @Column(nullable = false, unique = true)
