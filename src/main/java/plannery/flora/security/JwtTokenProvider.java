@@ -131,11 +131,11 @@ public class JwtTokenProvider {
         .parseClaimsJws(token)
         .getBody();
 
-    Long userId = claims.get(KEY_MEMBER_ID, Long.class);
+    Long memberId = claims.get(KEY_MEMBER_ID, Long.class);
     String email = claims.get(KEY_EMAIL, String.class);
     UserRole role = UserRole.valueOf(claims.get(KEY_ROLE, String.class));
 
-    return new MemberTokenInfoDto(userId, email, role);
+    return new MemberTokenInfoDto(memberId, email, role);
   }
 
   private UserDetails getUserDetails(Long userId, String email) {
