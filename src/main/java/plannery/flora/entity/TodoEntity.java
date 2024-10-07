@@ -61,6 +61,10 @@ public class TodoEntity extends BaseEntity {
     this.isCompleted = newIsCompleted;
   }
 
+  public void updateTodoRepeat(TodoRepeatEntity todoRepeatEntity) {
+    this.todoRepeat = todoRepeatEntity;
+  }
+
   public void updateTodo(String newTitle, TodoType newTodoType, String newIndexColor,
       LocalDate newTodoDate, String newDescription) {
     this.title = newTitle;

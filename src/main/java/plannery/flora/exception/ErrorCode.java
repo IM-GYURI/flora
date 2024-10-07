@@ -30,6 +30,7 @@ public enum ErrorCode {
   FLORA_NOT_FOUND(404, "해당 회원의 플로라를 찾을 수 없습니다."),
   FLORA_EXISTS(400, "플로라가 이미 존재합니다."),
   TODO_NOT_FOUND(404, "투두 엔티티가 존재하지 않습니다."),
+  TODO_COMPLETED_CHECK_MISS(409, "투두의 완료 상태가 일치하지 않습니다."),
   TODO_REPEAT_NOT_FOUND(404, "투두 반복 엔티티가 존재하지 않습니다.");
 
   private final int status;
