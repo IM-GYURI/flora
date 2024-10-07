@@ -1,7 +1,9 @@
 package plannery.flora.controller;
 
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_MEMBER_DELETE;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_PASSWORD_CHANGE;
+import static plannery.flora.enums.ResponseMessage.SUCCESS_REFRESH;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_SEND_PASSWORD_CHANGE;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_SIGNOUT;
 import static plannery.flora.enums.ResponseMessage.SUCCESS_SIGNUP;
@@ -24,8 +26,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import plannery.flora.dto.member.MemberInfoDto;
+import plannery.flora.dto.member.MemberTokenInfoDto;
 import plannery.flora.dto.member.PasswordChangeDto;
 import plannery.flora.dto.member.SignUpDto;
+import plannery.flora.security.JwtTokenProvider;
+import plannery.flora.service.BlacklistTokenService;
 import plannery.flora.service.MemberService;
 
 @RestController
@@ -34,6 +39,8 @@ import plannery.flora.service.MemberService;
 public class MemberController {
 
   private final MemberService memberService;
+  private final BlacklistTokenService blacklistTokenService;
+  private final JwtTokenProvider jwtTokenProvider;
 
   /**
    * 회원가입 or 로그인 후 JWT 토큰 발급 : 회원용
@@ -141,5 +148,34 @@ public class MemberController {
     memberService.deleteMember(userDetails, memberId);
 
     return ResponseEntity.ok(SUCCESS_MEMBER_DELETE.getMessage());
+  }
+
+  /**
+   * 토큰 재발급
+   *
+   * @param authHeader 현재 토큰
+   * @return "토큰 재발급 완료"
+   */
+  @PostMapping("/refresh")
+  public ResponseEntity<String> refreshToken(@RequestHeader("Authorization") String authHeader) {
+    String token = authHeader.substring("Bearer ".length());
+
+    if (!jwtTokenProvider.validateToken(token)) {
+      return ResponseEntity.status(UNAUTHORIZED).build();
+    }
+
+    blacklistTokenService.addToBlacklist(token);
+
+    MemberTokenInfoDto memberTokenInfoDto = jwtTokenProvider.getUserInfoFromToken(token);
+
+    String newToken = jwtTokenProvider.generateToken(memberTokenInfoDto.getUserId(),
+        memberTokenInfoDto.getEmail(), memberTokenInfoDto.getRole());
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + newToken);
+
+    return ResponseEntity.ok()
+        .headers(httpHeaders)
+        .body(SUCCESS_REFRESH.getMessage());
   }
 }
