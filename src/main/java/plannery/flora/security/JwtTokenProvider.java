@@ -22,6 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import plannery.flora.dto.member.MemberTokenInfoDto;
 import plannery.flora.entity.MemberEntity;
 import plannery.flora.enums.UserRole;
 import plannery.flora.exception.CustomException;
@@ -44,6 +45,7 @@ public class JwtTokenProvider {
   private long tokenValidTime;
 
   private final MemberRepository memberRepository;
+
   private Key secretKey;
 
   @PostConstruct
@@ -120,6 +122,20 @@ public class JwtTokenProvider {
 
     return new UsernamePasswordAuthenticationToken(userDetails, token,
         userDetails.getAuthorities());
+  }
+
+  public MemberTokenInfoDto getUserInfoFromToken(String token) {
+    Claims claims = Jwts.parserBuilder()
+        .setSigningKey(secretKey)
+        .build()
+        .parseClaimsJws(token)
+        .getBody();
+
+    Long userId = claims.get(KEY_MEMBER_ID, Long.class);
+    String email = claims.get(KEY_EMAIL, String.class);
+    UserRole role = UserRole.valueOf(claims.get(KEY_ROLE, String.class));
+
+    return new MemberTokenInfoDto(userId, email, role);
   }
 
   private UserDetails getUserDetails(Long userId, String email) {
