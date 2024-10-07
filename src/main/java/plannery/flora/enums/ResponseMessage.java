@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResponseMessage {
   SUCCESS_SIGNUP("로그인 완료"),
+  SUCCESS_REFRESH("토큰 재발급 완료"),
   SUCCESS_SIGNOUT("로그아웃 완료"),
   NO_IMAGE_FILE("이미지 파일 부재"),
   SUCCESS_IMAGE_DELETE("이미지 파일 삭제 완료"),
