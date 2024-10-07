@@ -168,7 +168,7 @@ public class MemberController {
 
     MemberTokenInfoDto memberTokenInfoDto = jwtTokenProvider.getUserInfoFromToken(token);
 
-    String newToken = jwtTokenProvider.generateToken(memberTokenInfoDto.getUserId(),
+    String newToken = jwtTokenProvider.generateToken(memberTokenInfoDto.getMemberId(),
         memberTokenInfoDto.getEmail(), memberTokenInfoDto.getRole());
 
     HttpHeaders httpHeaders = new HttpHeaders();
