@@ -1,5 +1,6 @@
 package plannery.flora.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -56,6 +58,9 @@ public class TodoEntity extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "todo_repeat_id")
   private TodoRepeatEntity todoRepeat;
+
+  @OneToOne(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
+  private TimerEntity timer;
 
   public void completeCheck(boolean newIsCompleted) {
     this.isCompleted = newIsCompleted;

@@ -27,7 +27,8 @@ public enum ResponseMessage {
   SUCCESS_TODO_CREATE("투두 생성 완료"),
   SUCCESS_TODO_COMPLETE("투두 완료 체크 성공"),
   SUCCESS_TODO_UPDATE("투두 수정 완료"),
-  SUCCESS_TODO_DELETE("투두 삭제 완료");
+  SUCCESS_TODO_DELETE("투두 삭제 완료"),
+  SUCCESS_TIMER_SAVE("타이머 저장 완료");
 
   private final String message;
 }
