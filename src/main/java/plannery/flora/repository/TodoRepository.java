@@ -28,4 +28,8 @@ public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
       @Param("isRoutine") boolean isRoutine);
 
   List<TodoEntity> findAllById(Iterable<Long> ids);
+
+  @Query("SELECT t FROM TodoEntity t WHERE t.member.id = :memberId AND t.todoDate = :today")
+  List<TodoEntity> findTodosByDate(@Param("memberId") Long memberId,
+      @Param("today") LocalDate today);
 }
