@@ -13,8 +13,6 @@ import plannery.flora.enums.TodoType;
 @Repository
 public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
 
-  List<TodoEntity> findAllByMemberId(Long memberId);
-
   List<TodoEntity> findAllByTodoRepeat(TodoRepeatEntity todoRepeatEntity);
 
   @Query("SELECT t FROM TodoEntity t " +
@@ -32,4 +30,7 @@ public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
   @Query("SELECT t FROM TodoEntity t WHERE t.member.id = :memberId AND t.todoDate = :today")
   List<TodoEntity> findTodosByDate(@Param("memberId") Long memberId,
       @Param("today") LocalDate today);
+
+  List<TodoEntity> findByMemberIdAndTitleContainingOrMemberIdAndDescriptionContaining(
+      Long memberId1, String keyword1, Long memberId2, String keyword2);
 }
