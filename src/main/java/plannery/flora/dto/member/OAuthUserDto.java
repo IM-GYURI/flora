@@ -1,4 +1,4 @@
-package plannery.flora.dto.search;
+package plannery.flora.dto.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchResultDto {
+public class OAuthUserDto {
 
-  private String path;
-
-  private String title;
-
-  private Long id;
+  private String email;
 }
