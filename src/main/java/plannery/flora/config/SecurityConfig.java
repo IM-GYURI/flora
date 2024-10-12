@@ -66,6 +66,7 @@ public class SecurityConfig {
             .requestMatchers("/notifications/**").hasRole("ADMIN")
 
             .requestMatchers("/members/**").hasRole("MEMBER")
+            .requestMatchers("/search/**").hasRole("MEMBER")
 
             .anyRequest().authenticated())
 
