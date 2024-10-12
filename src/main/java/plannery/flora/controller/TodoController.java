@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import plannery.flora.dto.todo.TodoCheckDto;
 import plannery.flora.dto.todo.TodoCreateDto;
 import plannery.flora.dto.todo.TodoResponseDto;
+import plannery.flora.dto.todo.TodoUpdateDto;
 import plannery.flora.enums.TodoType;
 import plannery.flora.service.TodoService;
 
@@ -105,14 +106,14 @@ public class TodoController {
    * @param userDetails   사용자 정보
    * @param memberId      회원ID
    * @param todoId        투두ID
-   * @param todoCreateDto : 제목, 투두타입(TODO_STUDY, TODO_LIFE), 루틴 여부, 인덱스 색상, 시작날짜, 종료날짜, 설명, 반복 요일
+   * @param todoUpdateDto : 제목, 투두타입(TODO_STUDY, TODO_LIFE), 루틴 여부, 인덱스 색상, 종료날짜, 설명, 반복 요일
    * @return "투두 수정 완료"
    */
   @PutMapping("/{todoId}")
   public ResponseEntity<String> changeTodo(@AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long memberId, @PathVariable Long todoId,
-      @RequestBody @Valid TodoCreateDto todoCreateDto) {
-    todoService.changeTodo(userDetails, memberId, todoId, todoCreateDto);
+      @RequestBody @Valid TodoUpdateDto todoUpdateDto) {
+    todoService.changeTodo(userDetails, memberId, todoId, todoUpdateDto);
 
     return ResponseEntity.ok(SUCCESS_TODO_UPDATE.getMessage());
   }

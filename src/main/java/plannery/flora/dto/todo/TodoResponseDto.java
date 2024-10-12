@@ -16,6 +16,8 @@ public class TodoResponseDto {
 
   private String title;
 
+  private String indexColor;
+
   @JsonProperty("isCompleted")
   private boolean isCompleted;
 }

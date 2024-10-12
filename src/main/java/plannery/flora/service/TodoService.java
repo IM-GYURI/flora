@@ -17,6 +17,7 @@ import plannery.flora.component.SecurityUtils;
 import plannery.flora.dto.todo.TodoCheckDto;
 import plannery.flora.dto.todo.TodoCreateDto;
 import plannery.flora.dto.todo.TodoResponseDto;
+import plannery.flora.dto.todo.TodoUpdateDto;
 import plannery.flora.entity.MemberEntity;
 import plannery.flora.entity.TodoEntity;
 import plannery.flora.entity.TodoRepeatEntity;
@@ -126,6 +127,7 @@ public class TodoService {
         .map(todo -> TodoResponseDto.builder()
             .todoId(todo.getId())
             .title(todo.getTitle())
+            .indexColor(todo.getIndexColor())
             .isCompleted(todo.isCompleted())
             .build())
         .toList();
@@ -203,67 +205,61 @@ public class TodoService {
    * @param userDetails   사용자 정보
    * @param memberId      회원ID
    * @param todoId        투두ID
-   * @param todoCreateDto : 제목, 투두타입(TODO_STUDY, TODO_LIFE), 루틴 여부, 인덱스 색상, 시작날짜, 종료날짜, 설명, 반복 요일
+   * @param todoUpdateDto : 제목, 투두타입(TODO_STUDY, TODO_LIFE), 루틴 여부, 인덱스 색상, 종료날짜, 설명, 반복 요일
    */
   public void changeTodo(UserDetails userDetails, Long memberId, Long todoId,
-      TodoCreateDto todoCreateDto) {
+      TodoUpdateDto todoUpdateDto) {
     MemberEntity member = securityUtils.validateUserDetails(userDetails, memberId);
-
-    if (todoCreateDto.getStartDate() != null && todoCreateDto.getStartDate()
-        .isAfter(todoCreateDto.getEndDate())) {
-      throw new CustomException(INVALID_DATETIME);
-    }
 
     TodoEntity todoEntity = todoRepository.findById(todoId)
         .orElseThrow(() -> new CustomException(TODO_NOT_FOUND));
 
     boolean isCurrentlyRoutine = todoEntity.getTodoRepeat() != null;
 
-    if (todoCreateDto.isRoutine()) {
+    if (todoUpdateDto.isRoutine()) {
       if (!isCurrentlyRoutine) {
         // 비루틴 -> 루틴 : TodoRepeatEntity 생성 -> 현재 TodoEntity에 연결 -> 현재 TodoEntity를 제외한 나머지 TodoEntity 생성
         TodoRepeatEntity newTodoRepeatEntity = TodoRepeatEntity.builder()
             .member(todoEntity.getMember())
-            .title(todoCreateDto.getTitle())
-            .description(todoCreateDto.getDescription())
-            .todoType(todoCreateDto.getTodoType())
-            .isRoutine(todoCreateDto.isRoutine())
-            .indexColor(todoCreateDto.getIndexColor())
-            .startDate(todoCreateDto.getStartDate())
-            .endDate(todoCreateDto.getEndDate())
-            .repeatDays(todoCreateDto.getRepeatDays())
+            .title(todoUpdateDto.getTitle())
+            .description(todoUpdateDto.getDescription())
+            .todoType(todoUpdateDto.getTodoType())
+            .isRoutine(todoUpdateDto.isRoutine())
+            .indexColor(todoUpdateDto.getIndexColor())
+            .startDate(todoEntity.getTodoDate())
+            .endDate(todoUpdateDto.getEndDate())
+            .repeatDays(todoUpdateDto.getRepeatDays())
             .build();
         todoRepeatRepository.save(newTodoRepeatEntity);
 
         todoEntity.updateTodoRepeat(newTodoRepeatEntity);
-        updateTodoEntity(todoEntity, todoCreateDto);
+        updateTodoEntity(todoEntity, todoUpdateDto);
 
-        createTodosForRepeatDays(todoCreateDto, member, newTodoRepeatEntity,
+        createTodosForRepeatDays(todoUpdateDto, member, newTodoRepeatEntity,
             todoEntity.getTodoDate());
       } else {
         // 루틴 -> 루틴 : TodoRepeatEntity 수정 -> 현재 TodoEntity는 내용 수정 -> 현재 TodoEntity의 todoDate 이후의 TodoEntity들은 전체 삭제 후 재생성
         TodoRepeatEntity todoRepeatEntity = todoEntity.getTodoRepeat();
 
-        todoRepeatEntity.updateTodoRepeat(todoCreateDto.getTitle(), todoCreateDto.getDescription(),
-            todoCreateDto.getTodoType(), todoCreateDto.getIndexColor(),
-            todoCreateDto.getStartDate(), todoCreateDto.getEndDate(),
-            todoCreateDto.getRepeatDays());
+        todoRepeatEntity.updateTodoRepeat(todoUpdateDto.getTitle(), todoUpdateDto.getDescription(),
+            todoUpdateDto.getTodoType(), todoUpdateDto.getIndexColor(), todoUpdateDto.getEndDate(),
+            todoUpdateDto.getRepeatDays());
 
-        updateTodoEntity(todoEntity, todoCreateDto);
+        updateTodoEntity(todoEntity, todoUpdateDto);
 
         deleteFutureTodos(todoRepeatEntity, todoEntity.getTodoDate());
-        createTodosForRepeatDays(todoCreateDto, todoEntity.getMember(), todoRepeatEntity,
+        createTodosForRepeatDays(todoUpdateDto, todoEntity.getMember(), todoRepeatEntity,
             todoEntity.getTodoDate());
       }
     } else {
       if (!isCurrentlyRoutine) {
         // 비루틴 -> 비루틴 : title, todoType, indexColor, description 수정
-        updateTodoEntity(todoEntity, todoCreateDto);
+        updateTodoEntity(todoEntity, todoUpdateDto);
       } else {
         // 루틴 -> 비루틴 : TodoEntity 수정 -> 현재 TodoEntity 외의 TodoEntity들은 전부 삭제
         TodoRepeatEntity todoRepeatEntity = todoEntity.getTodoRepeat();
 
-        updateTodoEntity(todoEntity, todoCreateDto);
+        updateTodoEntity(todoEntity, todoUpdateDto);
         deleteFutureTodos(todoRepeatEntity, todoEntity.getTodoDate());
       }
     }
@@ -273,12 +269,12 @@ public class TodoService {
    * TodoEntity 수정 : title, todoType, indexColor, todoDate, description
    *
    * @param todoEntity
-   * @param todoCreateDto
+   * @param todoUpdateDto
    */
-  private void updateTodoEntity(TodoEntity todoEntity, TodoCreateDto todoCreateDto) {
-    todoEntity.updateTodo(todoCreateDto.getTitle(), todoCreateDto.getTodoType(),
-        todoCreateDto.getIndexColor(), todoEntity.getTodoDate(),
-        todoCreateDto.getDescription());
+  private void updateTodoEntity(TodoEntity todoEntity, TodoUpdateDto todoUpdateDto) {
+    todoEntity.updateTodo(todoUpdateDto.getTitle(), todoUpdateDto.getTodoType(),
+        todoUpdateDto.getIndexColor(), todoEntity.getTodoDate(),
+        todoUpdateDto.getDescription());
   }
 
   /**
@@ -296,28 +292,28 @@ public class TodoService {
   }
 
   /**
-   * TodoRepeatEntity에 따른 TodoEntity 생성 : excludedDate 제외
+   * TodoRepeatEntity에 따른 TodoEntity 생성 : excludedDate 이후
    *
-   * @param todoCreateDto
+   * @param todoUpdateDto
    * @param member
    * @param todoRepeatEntity
    * @param excludedDate
    */
-  private void createTodosForRepeatDays(TodoCreateDto todoCreateDto, MemberEntity member,
+  private void createTodosForRepeatDays(TodoUpdateDto todoUpdateDto, MemberEntity member,
       TodoRepeatEntity todoRepeatEntity, LocalDate excludedDate) {
-    LocalDate currentDate = todoCreateDto.getStartDate();
-    LocalDate endDate = todoCreateDto.getEndDate();
-    List<DayOfWeek> repeatDays = todoCreateDto.getRepeatDays();
+    LocalDate currentDate = excludedDate;
+    LocalDate endDate = todoUpdateDto.getEndDate();
+    List<DayOfWeek> repeatDays = todoUpdateDto.getRepeatDays();
 
     while (!currentDate.isAfter(endDate)) {
       if (repeatDays.contains(currentDate.getDayOfWeek()) && !currentDate.equals(excludedDate)) {
         TodoEntity newTodoEntity = TodoEntity.builder()
             .member(member)
-            .title(todoCreateDto.getTitle())
-            .description(todoCreateDto.getDescription())
-            .todoType(todoCreateDto.getTodoType())
+            .title(todoUpdateDto.getTitle())
+            .description(todoUpdateDto.getDescription())
+            .todoType(todoUpdateDto.getTodoType())
             .todoDate(currentDate)
-            .indexColor(todoCreateDto.getIndexColor())
+            .indexColor(todoUpdateDto.getIndexColor())
             .isCompleted(false)
             .todoRepeat(todoRepeatEntity)
             .build();

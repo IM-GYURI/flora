@@ -64,13 +64,12 @@ public class TodoRepeatEntity extends BaseEntity {
   private List<DayOfWeek> repeatDays;
 
   public void updateTodoRepeat(String newTitle, String newDescription, TodoType newTodoType,
-      String newIndexColor, LocalDate newStartDate, LocalDate newEndDate,
+      String newIndexColor, LocalDate newEndDate,
       List<DayOfWeek> newRepeatDays) {
     this.title = newTitle;
     this.description = newDescription;
     this.todoType = newTodoType;
     this.indexColor = newIndexColor;
-    this.startDate = newStartDate;
     this.endDate = newEndDate;
     this.repeatDays = newRepeatDays;
   }
