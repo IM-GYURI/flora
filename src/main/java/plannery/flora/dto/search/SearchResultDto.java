@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class SearchResultDto {
 
   private String path;
-  
+
   private String title;
+
+  private Long id;
 }
