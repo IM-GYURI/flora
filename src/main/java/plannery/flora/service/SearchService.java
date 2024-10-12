@@ -52,6 +52,7 @@ public class SearchService {
       results.add(SearchResultDto.builder()
           .path("캘린더 > 오늘의 일기")
           .title(diary.getTitle())
+          .id(diary.getId())
           .build());
     }
 
@@ -62,6 +63,7 @@ public class SearchService {
       results.add(SearchResultDto.builder()
           .path("캘린더 > 이벤트")
           .title(event.getTitle())
+          .id(event.getId())
           .build());
     }
 
@@ -72,6 +74,7 @@ public class SearchService {
       results.add(SearchResultDto.builder()
           .path("대시보드 > 목표/다짐")
           .title(promise.getContent())
+          .id(promise.getId())
           .build());
     }
 
@@ -82,6 +85,7 @@ public class SearchService {
       results.add(SearchResultDto.builder()
           .path("캘린더 > Todolist")
           .title(todo.getTitle())
+          .id(todo.getId())
           .build());
     }
 
