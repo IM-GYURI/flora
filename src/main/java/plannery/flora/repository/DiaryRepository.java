@@ -16,4 +16,7 @@ public interface DiaryRepository extends JpaRepository<DiaryEntity, Long> {
 
   @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM DiaryEntity d WHERE d.member.id = :memberId AND d.date = :date")
   boolean existsByMemberIdAndDate(@Param("memberId") Long memberId, @Param("date") LocalDate date);
+
+  List<DiaryEntity> findByMemberIdAndTitleContainingOrMemberIdAndContentContaining(
+      Long memberId1, String keyword1, Long memberId2, String keyword2);
 }
