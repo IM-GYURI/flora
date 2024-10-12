@@ -13,12 +13,10 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
 
   List<EventEntity> findAllByMemberId(Long memberId);
 
-
   List<EventEntity> findAllByMemberIdAndStartDateTimeLessThanEqualAndEndDateTimeGreaterThanEqualOrStartDateTimeBetweenOrEndDateTimeBetween(
       Long memberId, LocalDateTime startOfDay, LocalDateTime endOfDay,
       LocalDateTime startRange1, LocalDateTime endRange1,
       LocalDateTime startRange2, LocalDateTime endRange2);
-
 
   @Query("SELECT e FROM EventEntity e WHERE e.member.id = :memberId " +
       "AND (e.startDateTime <= :endDate AND e.endDateTime >= :startDate)")
@@ -29,4 +27,7 @@ public interface EventRepository extends JpaRepository<EventEntity, Long> {
   @Query("SELECT e FROM EventEntity e WHERE e.member.id = :memberId AND e.isDDay = true AND e.startDateTime >= :todayStartOfDay")
   List<EventEntity> findDDayEventsByMemberId(@Param("memberId") Long memberId,
       @Param("todayStartOfDay") LocalDateTime todayStartOfDay);
+
+  List<EventEntity> findByMemberIdAndTitleContainingOrMemberIdAndDescriptionContaining(
+      Long memberId1, String keyword1, Long memberId2, String keyword2);
 }
