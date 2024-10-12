@@ -126,6 +126,7 @@ public class TodoService {
         .map(todo -> TodoResponseDto.builder()
             .todoId(todo.getId())
             .title(todo.getTitle())
+            .indexColor(todo.getIndexColor())
             .isCompleted(todo.isCompleted())
             .build())
         .toList();
