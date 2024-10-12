@@ -1,5 +1,6 @@
 package plannery.flora.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,4 +13,6 @@ public interface PromiseRepository extends JpaRepository<PromiseEntity, Long> {
 
   @Query("SELECT p FROM PromiseEntity p WHERE p.member.id = :memberId")
   Optional<PromiseEntity> findByMemberId(@Param("memberId") Long memberId);
+
+  List<PromiseEntity> findByMemberIdAndContentContaining(Long memberId, String keyword);
 }
