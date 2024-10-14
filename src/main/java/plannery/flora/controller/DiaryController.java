@@ -43,8 +43,8 @@ public class DiaryController {
    */
   @PostMapping
   public ResponseEntity<String> createDiary(@AuthenticationPrincipal UserDetails userDetails,
-      @RequestParam("file") MultipartFile file, @PathVariable Long memberId,
-      @RequestPart @Valid DiaryCreateDto diaryCreateDto) {
+      @RequestPart(value = "file", required = false) MultipartFile file,
+      @PathVariable Long memberId, @RequestPart @Valid DiaryCreateDto diaryCreateDto) {
     diaryService.createDiary(userDetails, memberId, file, diaryCreateDto);
 
     return ResponseEntity.ok(SUCCESS_DIARY_CREATE.getMessage());
